@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot, User, Trash2 } from 'lucide-react';
 
-export default function ChatArea({ messages, onSendMessage }) {
+export default function ChatArea({ messages, onSendMessage, onClearChat }) {
   const [input, setInput] = useState('');
   const chatEndRef = useRef(null);
 
@@ -25,6 +25,15 @@ export default function ChatArea({ messages, onSendMessage }) {
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
           <span className="font-semibold text-slate-700 text-sm">NewLore Research Engine Active</span>
         </div>
+        
+        {/* Clear Chat Button */}
+        <button
+          onClick={onClearChat}
+          className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-red-500 hover:bg-red-50 transition-all rounded-lg border border-slate-200 hover:border-red-200"
+        >
+          <Trash2 size={14} />
+          Clear Chat
+        </button>
       </div>
 
       {/* Chat Messages Log */}
@@ -70,7 +79,7 @@ export default function ChatArea({ messages, onSendMessage }) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question about the documents (e.g., 'What are the key findings?')"
+            placeholder="Ask a question about the documents..."
             className="w-full bg-slate-100 border border-slate-200 focus:border-indigo-500 focus:bg-white rounded-xl pl-4 pr-12 py-3.5 text-sm outline-none transition-all placeholder-slate-400 text-slate-800"
           />
           <button

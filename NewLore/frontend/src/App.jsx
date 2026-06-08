@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import ChatArea from './ChatArea';
 
@@ -9,6 +9,27 @@ export default function App() {
     { id: 1, sender: 'ai', text: 'Hello! Please upload a document in the sidebar, and I will help you research and extract information from it.' }
   ]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Use a configurable URL (defaults to localhost if not specified in .env)
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  // Fetch initial files from backend
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/files`);
+        if (response.ok) {
+          const data = await response.json();
+          setDocuments(data);
+          // By default, select all loaded documents
+          setSelectedDocs(new Set(data.map(doc => doc.name)));
+        }
+      } catch (error) {
+        console.error("Failed to fetch initial files:", error);
+      }
+    };
+    fetchFiles();
+  }, []);
 
   const toggleDocumentSelection = (filename) => {
     setSelectedDocs((prev) => {
@@ -22,14 +43,10 @@ export default function App() {
     });
   };
 
-  // Use a configurable URL (defaults to localhost if not specified in .env)
-  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-  // Send binary document stream to the live FastAPI /upload endpoint
   const handleFileUpload = async (file) => {
     setIsUploading(true);
     const formData = new FormData();
-    formData.append("file", file); // Must match the Python parameter variable name exactly
+    formData.append("file", file);
 
     try {
       const response = await fetch(`${API_BASE_URL}/upload`, {
@@ -39,12 +56,11 @@ export default function App() {
       const data = await response.json();
       
       if (response.ok && data.status === "success") {
-        const newDoc = {
-          id: Date.now(),
-          name: file.name,
-          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-        };
-        setDocuments([...documents, newDoc]);
+        // Refresh document list from server to get accurate IDs and sizes
+        const filesRes = await fetch(`${API_BASE_URL}/files`);
+        const filesData = await filesRes.json();
+        setDocuments(filesData);
+        
         setSelectedDocs((prev) => new Set(prev).add(file.name));
         setMessages((prev) => [...prev, {
           id: Date.now(),
@@ -59,14 +75,42 @@ export default function App() {
       setMessages((prev) => [...prev, {
         id: Date.now(),
         sender: 'ai',
-        text: `Error uploading file: ${error.message}. Make sure your local Python server is running.`
+        text: `Error uploading file: ${error.message}.`
       }]);
     } finally {
       setIsUploading(false);
     }
   };
 
-  // Query your internal knowledge base engine via the /chat endpoint
+  const handleDeleteFile = async (filename) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/files/${encodeURIComponent(filename)}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setDocuments((prev) => prev.filter(doc => doc.name !== filename));
+        setSelectedDocs((prev) => {
+          const next = new Set(prev);
+          next.delete(filename);
+          return next;
+        });
+        setMessages((prev) => [...prev, {
+          id: Date.now(),
+          sender: 'ai',
+          text: `Successfully removed "${filename}" from the knowledge base.`
+        }]);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+  };
+
+  const handleClearChat = () => {
+    setMessages([
+      { id: Date.now(), sender: 'ai', text: 'Chat history cleared. How can I help you with your documents?' }
+    ]);
+  };
+
   const handleSendMessage = async (text) => {
     const userMsg = { id: Date.now(), sender: 'user', text };
     setMessages((prev) => [...prev, userMsg]);
@@ -90,7 +134,7 @@ export default function App() {
         { id: Date.now() + 1, sender: 'ai', text: data.response }
       ]);
     } catch (error) {
-      console.error("Chat engine connection error:", error);
+      console.error("Chat error:", error);
       setMessages((prev) => [
         ...prev,
         { id: Date.now() + 1, sender: 'ai', text: "Sorry, I had trouble connecting to the document processing engine." }
@@ -100,17 +144,20 @@ export default function App() {
 
   return (
     <div className="flex h-screen w-screen bg-enterprise-50 text-enterprise-800 font-sans overflow-hidden">
-      {/* Document Sidebar Panel */}
       <Sidebar 
         documents={documents} 
         onFileUpload={handleFileUpload} 
+        onDeleteFile={handleDeleteFile}
         isUploading={isUploading} 
         selectedDocs={selectedDocs}
         onToggleDoc={toggleDocumentSelection}
       />
       
-      {/* Interactive AI Chat Panel */}
-      <ChatArea messages={messages} onSendMessage={handleSendMessage} />
+      <ChatArea 
+        messages={messages} 
+        onSendMessage={handleSendMessage} 
+        onClearChat={handleClearChat}
+      />
     </div>
   );
 }
