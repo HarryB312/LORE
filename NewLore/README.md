@@ -15,44 +15,25 @@ NewLore Researcher is a professional RAG (Retrieval-Augmented Generation) tool t
     ollama run llama3.2
     ```
 
-## Installation & Setup
+## Quick Start (Business/Windows)
+The easiest way to start NewLore is using the **One-Click Launcher**:
+1.  **Prerequisites:** Install [Ollama](https://ollama.com) and run `ollama pull llama3.2`.
+2.  **Launch:** Double-click `run_app.bat` in the root folder.
+3.  **Access:** Open your browser to `http://localhost:5173`.
 
-### 1. Backend (Python Researcher Engine)
-The backend manages the document indexing and the AI logic.
+## 💰 Zero API Costs
+Unlike ChatGPT or Claude, NewLore Researcher runs **100% locally** on your own hardware. 
+- **No Monthly Fees:** You don't need to pay for API credits or subscriptions.
+- **100% Private:** Your business documents never leave your computer or office network.
 
-```bash
-cd backend
-python3 -m venv venv
+## 🏢 Business & Team Use
+### Shared Office Server
+You can run NewLore on one powerful "server" computer and allow your entire team to access it via your office Wi-Fi:
+1.  Run `run_app.bat` on the server computer.
+2.  Find the server's local IP address (e.g., `192.168.1.50`).
+3.  Other team members can access the dashboard by typing `http://[SERVER_IP]:5173` into their browsers.
 
-# Activate (macOS/Linux):
-source venv/bin/activate
-# Activate (Fish Shell):
-source venv/bin/activate.fish
-# Activate (Windows):
-# venv\Scripts\activate
-
-pip install -r requirements.txt
-python3 main.py
-```
-
-### 2. Frontend (React UI)
-The interactive dashboard for research.
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-Visit `http://localhost:5173` to start researching.
-
-## Deployment for Teams
-For business use, you don't need to install this on every computer. You can set up a **Shared Research Server**:
-1.  Install the backend and Ollama on one powerful central machine.
-2.  Set `OLLAMA_HOST=0.0.0.0` on that server.
-3.  Users can access the researcher dashboard via the server's IP address.
-*See [DEPLOYMENT.md](./DEPLOYMENT.md) for more technical details.*
-
-## How to use
+## Installation & Setup (Developer/Manual)
 1.  **Upload:** Use the sidebar to upload PDF, TXT, or MD files.
 2.  **Filter:** Click the documents in the sidebar to select which ones the AI should focus on.
 3.  **Chat:** Ask questions. The AI will provide answers and tell you exactly which page/file it used for its facts.

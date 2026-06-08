@@ -22,6 +22,9 @@ export default function App() {
     });
   };
 
+  // Use a configurable URL (defaults to localhost if not specified in .env)
+  const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
   // Send binary document stream to the live FastAPI /upload endpoint
   const handleFileUpload = async (file) => {
     setIsUploading(true);
@@ -29,7 +32,7 @@ export default function App() {
     formData.append("file", file); // Must match the Python parameter variable name exactly
 
     try {
-      const response = await fetch("http://localhost:8000/upload", {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: "POST",
         body: formData,
       });
@@ -76,7 +79,7 @@ export default function App() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/chat", {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: "POST",
         body: formData,
       });
