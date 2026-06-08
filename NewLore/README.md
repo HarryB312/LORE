@@ -18,11 +18,20 @@ NewLore Researcher is a professional RAG (Retrieval-Augmented Generation) tool t
     ollama run llama3.2
     ```
 
-## Quick Start (Business/Windows)
-The easiest way to start NewLore is using the **One-Click Launcher**:
+## Quick Start
+### Windows
 1.  **Prerequisites:** Install [Ollama](https://ollama.com) and run `ollama pull llama3.2`.
-2.  **Launch:** Double-click `run_app.bat` in the root folder.
+2.  **Launch:** Double-click `run_app.bat` in the root folder (or use the "NewLore Researcher" desktop shortcut).
 3.  **Access:** Open your browser to `http://localhost:5173`.
+
+### macOS
+1.  **Prerequisites:** Install [Ollama](https://ollama.com) and run `ollama pull llama3.2`.
+2.  **Permissions:** Open Terminal in the project folder and run:
+    ```bash
+    chmod +x run_app.sh
+    ```
+3.  **Launch:** Run `./run_app.sh` or double-click it.
+4.  **Access:** Open your browser to `http://localhost:5173`.
 
 ## 💰 Zero API Costs
 Unlike ChatGPT or Claude, NewLore Researcher runs **100% locally** on your own hardware. 
