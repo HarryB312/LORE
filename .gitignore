@@ -1,0 +1,24 @@
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+backend/backend.log
+backend/startup.log
+
+# Local data/indices (platform specific and frequently changing)
+backend/faiss_index/
+backend/faiss_index_darwin/
+backend/faiss_index_windows/
+backend/metadata_darwin.json
+backend/metadata_windows.json
+backend/metadata.json
+
+# Python virtual environments
+backend/venv/
+backend/venv_mac/
+
+# Node modules
+node_modules/
+frontend/node_modules/
