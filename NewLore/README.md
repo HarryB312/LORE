@@ -80,10 +80,37 @@ NewLore/
 ├── LORE.bat            # Windows One-Click Launcher
 ├── backend/            # FastAPI, FAISS, and LangChain logic
 │   ├── main.py         # Primary API server
-│   └── faiss_index/    # Your local vector database
+│   └── faiss_index/    # Your local vector database (ignored by Git)
 └── frontend/           # React + Vite user interface
     └── src/            # UI Components (Sidebar, Chat, etc.)
 ```
+
+---
+
+## 🔄 Development & Git Workflow
+
+To keep the repository clean and avoid conflicts between Windows and macOS:
+
+### **1. Ignored Files**
+The project is configured with a `.gitignore` to skip files that are unique to your local machine or change every time the app runs:
+- **Logs:** `backend.log`, `startup.log`
+- **Data:** `faiss_index/`, `metadata.json`, and platform-specific variants (`_darwin`, `_windows`).
+- **OS Files:** `.DS_Store`, `Thumbs.db`
+- **Environments:** `venv/`, `node_modules/`
+
+### **2. Recommended Git Steps**
+When pushing changes, your standard workflow is safe:
+```bash
+git add .
+git commit -m "Describe your code changes"
+git push
+```
+*Git will automatically skip the ignored files above, so your commits stay focused on source code.*
+
+### **3. Working Across Machines (Mac <-> Windows)**
+If you pull changes on a different operating system:
+- Your local database (`faiss_index/`) will **not** be overwritten by the other machine.
+- If you notice "messed up" commits or merge conflicts in log files, ensure your `.gitignore` is up to date and run `git rm --cached <filename>` to stop tracking the problematic file.
 
 ---
 
