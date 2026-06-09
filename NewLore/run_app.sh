@@ -30,8 +30,8 @@ cleanup() {
     exit
 }
 
-# Trap Ctrl+C (SIGINT) and exit (SIGTERM)
-trap cleanup SIGINT SIGTERM
+# Trap Ctrl+C (SIGINT), window close (SIGHUP), and termination (SIGTERM)
+trap cleanup SIGINT SIGTERM SIGHUP
 
 # 2. Start Backend
 echo "[2/3] Starting Python Processing Engine..."
@@ -41,14 +41,15 @@ if [ ! -d "backend" ]; then
 fi
 
 cd backend
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
-    source venv/bin/activate
+# Use a Mac-specific venv to avoid conflict with Windows venv
+if [ ! -d "venv_mac" ]; then
+    echo "Creating macOS virtual environment..."
+    python3 -m venv venv_mac
+    source venv_mac/bin/activate
     echo "Installing backend dependencies..."
     pip install -r requirements.txt
 else
-    source venv/bin/activate
+    source venv_mac/bin/activate
 fi
 
 echo "Launching Backend..."
