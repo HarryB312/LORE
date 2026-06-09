@@ -9,6 +9,7 @@ from langchain_ollama import OllamaLLM
 import shutil
 from typing import Optional, List
 import json
+import platform
 
 app = FastAPI()
 
@@ -22,8 +23,9 @@ app.add_middleware(
 )
 
 # Constants
-INDEX_PATH = "faiss_index"
-METADATA_PATH = "metadata.json"
+SYSTEM = platform.system().lower()
+INDEX_PATH = f"faiss_index_{SYSTEM}"
+METADATA_PATH = f"metadata_{SYSTEM}.json"
 
 # Initialize local embeddings
 embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
@@ -76,9 +78,17 @@ async def upload_document(file: UploadFile = File(...)):
     temp_path = f"temp_{file.filename}"
     
     try:
-        # Check if already indexed
+        # If already indexed, we'll allow re-indexing to handle cases where 
+        # the user wants to refresh or fix a corrupt platform index.
+        # We surgically remove the old entries first.
         if file.filename in indexed_files:
-             return {"status": "success", "filename": file.filename, "message": "Already indexed"}
+            try:
+                if vector_store:
+                    doc_ids = [doc_id for doc_id, doc in vector_store.docstore._dict.items() if doc.metadata.get("source") == file.filename]
+                    if doc_ids:
+                        vector_store.delete(doc_ids)
+            except Exception as e:
+                print(f"Warning: Could not clear existing index for {file.filename}: {e}")
 
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -91,11 +101,17 @@ async def upload_document(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Unsupported format.")
         
         docs = loader.load()
+        if not docs:
+            raise HTTPException(status_code=400, detail="Document contains no readable content.")
+
         for doc in docs:
             doc.metadata["source"] = file.filename
 
         text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
         chunks = text_splitter.split_documents(docs)
+        
+        if not chunks:
+            raise HTTPException(status_code=400, detail="Document content too sparse to index.")
         
         if vector_store is None:
             vector_store = FAISS.from_documents(chunks, embeddings)

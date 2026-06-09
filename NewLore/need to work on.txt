@@ -1,0 +1,15 @@
+FUTURE TASKS & PLANS
+
+1. Windows Launcher Refactor (LORE.bat)
+- Objective: Make it so closing the terminal or pressing Ctrl+C shuts down both the backend and frontend at the same time.
+- Implementation Plan:
+  * Single Window: Use 'start /B' to run the Backend and Frontend in the background of the same command prompt.
+  * Logging: Redirect output to 'backend\backend.log' and 'frontend\frontend.log' to keep the terminal clean.
+  * Automatic Shutdown: Add a cleanup sequence at the end of the script using 'taskkill' or similar to stop the specific Python and Node processes when the main batch script is terminated.
+
+2. Document Sparsity Handling
+- Observation: Some documents report "content too sparse to index" (Error 400).
+- Potential Work: Consider lowering the 'chunk_size' (currently 500) or 'chunk_overlap' if users frequently work with very short documents.
+
+3. Reset Index UI
+- Feature Idea: Add a "Reset Knowledge Base" button to the frontend to allow users to easily clear platform-specific indexes and start fresh without manually deleting folders.

@@ -21,6 +21,18 @@ else
     sleep 5
 fi
 
+# Function to kill background processes on exit
+cleanup() {
+    echo ""
+    echo "Shutting down NewLore..."
+    kill $BACKEND_PID 2>/dev/null
+    kill $FRONTEND_PID 2>/dev/null
+    exit
+}
+
+# Trap Ctrl+C (SIGINT) and exit (SIGTERM)
+trap cleanup SIGINT SIGTERM
+
 # 2. Start Backend
 echo "[2/3] Starting Python Processing Engine..."
 if [ ! -d "backend" ]; then
@@ -35,10 +47,13 @@ if [ ! -d "venv" ]; then
     source venv/bin/activate
     echo "Installing backend dependencies..."
     pip install -r requirements.txt
+else
+    source venv/bin/activate
 fi
 
-# Launch backend in a new Terminal window
-osascript -e 'tell app "Terminal" to do script "cd \"'$(pwd)'\" && source venv/bin/activate && python3 main.py"'
+echo "Launching Backend..."
+python3 main.py > backend.log 2>&1 &
+BACKEND_PID=$!
 cd ..
 
 # 3. Start Frontend
@@ -54,16 +69,20 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-# Launch frontend in a new Terminal window
-osascript -e 'tell app "Terminal" to do script "cd \"'$(pwd)'\" && npm run dev -- --host"'
+echo "Launching Frontend..."
+npm run dev -- --host > frontend.log 2>&1 &
+FRONTEND_PID=$!
 cd ..
 
 echo ""
 echo "========================================"
-echo "  SUCCESS: App is launching!"
+echo "  SUCCESS: App is running!"
 echo "========================================"
 echo ""
-echo "Interface will be ready at: http://localhost:5173"
+echo "Interface: http://localhost:5173"
 echo ""
-echo "Keep the other two Terminal windows open while using the app."
+echo ">>> PRESS CTRL+C TO SHUT DOWN EVERYTHING <<<"
 echo ""
+
+# Wait for background processes
+wait $BACKEND_PID $FRONTEND_PID
